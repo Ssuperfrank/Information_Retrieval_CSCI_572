@@ -48,7 +48,7 @@ class SpellCorrector {
 	 * @param string $text
 	 * @return array The list of words
 	 */
-	private static function  words($text) {
+	public static function  words($text) {
 		$matches = array();
 		preg_match_all("/[a-z]+/",strtolower($text),$matches);
 		return $matches[0];
@@ -61,12 +61,16 @@ class SpellCorrector {
 	 * @param array $features
 	 * @return array
 	 */
-	private static function train(array $features) {
+	public static function train(array $features) {
 		$model = array();
 		$count = count($features);
 		for($i = 0; $i<$count; $i++) {
-			$f = $features[$i];
-			$model[$f] +=1;
+			$f = $features[$i];	
+			if(!array_key_exists($f, $model)){
+				$model[$f] = 1;
+			}else{
+				$model[$f] +=1;
+			}
 		}
 		return $model;
 	}
@@ -152,10 +156,12 @@ class SpellCorrector {
 			/* To optimize performance, the serialized dictionary can be saved on a file
 			instead of parsing every single execution */
 			if(!file_exists('serialized_dictionary.txt')) {
+                //echo("iii");
 				self::$NWORDS = self::train(self::words(file_get_contents("big.txt")));
 				$fp = fopen("serialized_dictionary.txt","w+");
 				fwrite($fp,serialize(self::$NWORDS));
 				fclose($fp);
+                //echo("here");
 			} else {
 				self::$NWORDS = unserialize(file_get_contents("serialized_dictionary.txt"));
 			}
@@ -184,7 +190,6 @@ class SpellCorrector {
 		}
 		return $word;
 	}
-	
 	
 }
 
